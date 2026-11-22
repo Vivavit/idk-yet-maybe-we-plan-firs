@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import {
   Plus,
@@ -33,15 +33,55 @@ export function ScriptView({ project, readOnly, onChange }: Props) {
     project.scenes[0]?.id || ""
   );
 
+  // Local fast-typing buffer for Full Script so typing is 0ms lag
+  // and never stutters or drops characters during cloud sync.
+  const [draftFullScript, setDraftFullScript] = useState<string>(
+    project.fullScript || ""
+  );
+  const fullScriptFocusedRef = useRef(false);
+  const flushTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (!fullScriptFocusedRef.current) {
+      setDraftFullScript(project.fullScript || "");
+    }
+  }, [project.fullScript]);
+
+  useEffect(() => {
+    return () => {
+      if (flushTimerRef.current) clearTimeout(flushTimerRef.current);
+    };
+  }, []);
+
+  const handleFullScriptInput = (val: string) => {
+    if (readOnly) return;
+    setDraftFullScript(val);
+    if (flushTimerRef.current) clearTimeout(flushTimerRef.current);
+    flushTimerRef.current = setTimeout(() => {
+      onChange({ ...project, fullScript: val });
+    }, 350);
+  };
+
+  const handleFullScriptBlur = () => {
+    fullScriptFocusedRef.current = false;
+    if (flushTimerRef.current) {
+      clearTimeout(flushTimerRef.current);
+      flushTimerRef.current = null;
+    }
+    if (draftFullScript !== (project.fullScript || "")) {
+      onChange({ ...project, fullScript: draftFullScript });
+    }
+  };
+
   const activeScene =
     project.scenes.find((s) => s.id === selectedSceneId) || project.scenes[0];
 
   const wordStats = useMemo(() => {
-    const text = (project.fullScript || "").trim();
+    const text = (draftFullScript || "").trim();
     const words = text ? text.split(/\s+/).length : 0;
     const estSec = Math.round((words / 140) * 60);
     return { words, estSec };
-  }, [project.fullScript]);
+  }, [draftFullScript]);
 
   const updateProjectMeta = (patch: Partial<Project>) => {
     if (readOnly) return;
@@ -99,6 +139,7 @@ export function ScriptView({ project, readOnly, onChange }: Props) {
         return `${header}\n${sc.title}\n\n${body}`;
       })
       .join("\n\n---\n\n");
+    setDraftFullScript(compiled);
     updateProjectMeta({ fullScript: compiled });
   };
 
@@ -240,8 +281,12 @@ export function ScriptView({ project, readOnly, onChange }: Props) {
             <textarea
               disabled={readOnly}
               rows={layoutMode === "full" ? 20 : 18}
-              value={project.fullScript || ""}
-              onChange={(e) => updateProjectMeta({ fullScript: e.target.value })}
+              value={draftFullScript}
+              onFocus={() => {
+                fullScriptFocusedRef.current = true;
+              }}
+              onBlur={handleFullScriptBlur}
+              onChange={(e) => handleFullScriptInput(e.target.value)}
               placeholder="Write your full story, treatment, voiceover, or screenplay here first — then break it down into scenes..."
               className="w-full flex-1 resize-y rounded-[20px] bg-[var(--bg-subtle)] p-5 font-mono text-[14px] leading-[1.75] text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-border)]"
             />

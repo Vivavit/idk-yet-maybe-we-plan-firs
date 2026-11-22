@@ -6,6 +6,27 @@ const DB_VERSION = 1;
 const STORE_NAME = "projects";
 const CHANNEL_NAME = "idk-plan-first-sync";
 
+// Track our own recent saves per shareCode so Supabase Realtime echoes
+// never overwrite characters the user is actively typing.
+const recentLocalSaves = new Map<string, number>();
+
+function markLocalSave(shareCode: string) {
+  recentLocalSaves.set(shareCode.toUpperCase(), Date.now());
+}
+
+function isRecentLocalEcho(shareCode: string, incomingUpdatedAt?: string): boolean {
+  const lastLocal = recentLocalSaves.get(shareCode.toUpperCase());
+  if (!lastLocal) return false;
+  if (Date.now() - lastLocal < 2200) {
+    if (!incomingUpdatedAt) return true;
+    const incomingMs = new Date(incomingUpdatedAt).getTime();
+    if (!Number.isNaN(incomingMs) && incomingMs <= lastLocal + 500) {
+      return true;
+    }
+  }
+  return false;
+}
+
 function openDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
     if (typeof window === "undefined" || !("indexedDB" in window)) {
@@ -86,6 +107,9 @@ export function subscribeProjectChanges(
           const row = payload.new as { data?: Project } | undefined;
           if (row?.data) {
             const incoming = normalizeProject(row.data);
+            if (isRecentLocalEcho(incoming.shareCode, incoming.updatedAt)) {
+              return;
+            }
             saveProjectLocalOnly(incoming).catch(() => {});
             onMessage({
               type: "PROJECT_UPDATED",
@@ -190,6 +214,7 @@ export async function saveProject(project: Project): Promise<Project> {
     updatedAt: new Date().toISOString(),
   });
 
+  markLocalSave(updated.shareCode);
   await saveProjectLocalOnly(updated);
   broadcastProjectChange(updated.id, updated.shareCode);
 

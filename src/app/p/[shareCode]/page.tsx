@@ -204,7 +204,7 @@ export default function ProjectWorkspacePage() {
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     saveTimerRef.current = setTimeout(() => {
       saveProject(updated).catch(() => {});
-    }, 220);
+    }, 500);
   }, []);
 
   useEffect(() => {
