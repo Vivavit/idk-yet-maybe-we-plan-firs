@@ -1,0 +1,113 @@
+@import "tailwindcss";
+
+:root {
+  --bg-canvas: #D5E4F7;
+  --bg-surface: rgba(255, 255, 255, 0.46);
+  --bg-surface-solid: rgba(255, 255, 255, 0.82);
+  --bg-subtle: rgba(255, 255, 255, 0.44);
+  --bg-glass: rgba(255, 255, 255, 0.40);
+  --bg-glass-strong: rgba(255, 255, 255, 0.72);
+  --border-hairline: rgba(255, 255, 255, 0.62);
+  --border-specular: rgba(255, 255, 255, 0.92);
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+  --accent: #2563EB;
+  --accent-soft: rgba(37, 99, 235, 0.13);
+  --accent-border: rgba(37, 99, 235, 0.30);
+  --shadow-soft: 0 12px 34px rgba(30, 58, 138, 0.08), inset 0 1px 1px var(--border-specular);
+  --shadow-float: 0 18px 46px rgba(30, 58, 138, 0.12), inset 0 1px 1px var(--border-specular);
+  --anchor-bg: #0F172A;
+  --anchor-text: #F8FAFC;
+  --ambient-bg: linear-gradient(135deg, #C3DAF7 0%, #D9E7FA 48%, #ECF2FB 100%);
+}
+
+.dark {
+  --bg-canvas: #09090B;
+  --bg-surface: rgba(24, 24, 28, 0.56);
+  --bg-surface-solid: rgba(32, 32, 37, 0.88);
+  --bg-subtle: rgba(255, 255, 255, 0.065);
+  --bg-glass: rgba(18, 18, 22, 0.54);
+  --bg-glass-strong: rgba(20, 20, 24, 0.84);
+  --border-hairline: rgba(255, 255, 255, 0.11);
+  --border-specular: rgba(255, 255, 255, 0.16);
+  --text-primary: #F5F5F7;
+  --text-secondary: #8E8E93;
+  --accent: #60A5FA;
+  --accent-soft: rgba(96, 165, 250, 0.16);
+  --accent-border: rgba(96, 165, 250, 0.34);
+  --shadow-soft: 0 12px 34px rgba(0, 0, 0, 0.42), inset 0 1px 0 var(--border-specular);
+  --shadow-float: 0 22px 54px rgba(0, 0, 0, 0.6), inset 0 1px 0 var(--border-specular);
+  --anchor-bg: #F5F5F7;
+  --anchor-text: #09090B;
+  --ambient-bg: linear-gradient(135deg, #070709 0%, #121216 50%, #09090B 100%);
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-canvas);
+  background-image: var(--ambient-bg);
+  background-attachment: fixed;
+  color: var(--text-primary);
+  font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.glass-surface {
+  background: var(--bg-glass);
+  backdrop-filter: blur(32px) saturate(190%);
+  -webkit-backdrop-filter: blur(32px) saturate(190%);
+  border: 1px solid var(--border-hairline);
+  box-shadow: var(--shadow-float);
+}
+
+.glass-modal {
+  background: var(--bg-glass-strong);
+  backdrop-filter: blur(36px) saturate(195%);
+  -webkit-backdrop-filter: blur(36px) saturate(195%);
+  border: 1px solid var(--border-hairline);
+  box-shadow: var(--shadow-float);
+}
+
+.surface-card {
+  background: var(--bg-surface);
+  backdrop-filter: blur(28px) saturate(185%);
+  -webkit-backdrop-filter: blur(28px) saturate(185%);
+  border: 1px solid var(--border-hairline);
+  box-shadow: var(--shadow-soft);
+}
+
+.surface-subtle {
+  background: var(--bg-subtle);
+}
+
+.hairline-divider {
+  border-color: var(--border-hairline);
+}
+
+/* Custom subtle scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-hairline);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+}
